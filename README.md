@@ -1,2 +1,2 @@
 # LEDTABLE-Binary-Clock
-Binary Clock for LED Table
+Binary Clock for LED-Table
