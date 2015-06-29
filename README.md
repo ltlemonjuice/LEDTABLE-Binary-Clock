@@ -2,8 +2,12 @@
 
 ##Project: 
 
-Build a Binary Clock for the LED Table  
+A Binary Clock for my LED Table which displays time similar to my old watch.  
+
+Watch:  
+http://www.01theone.com/kt102b1.html
+
+LEDTABLE:  
 http://imgur.com/a/yVOh2    
   
-##TODO / Ideas / Changes:
-- The alternative layout (ALT) will probably be used, due to better visual representation and easier understanding of the basic layout.
+
