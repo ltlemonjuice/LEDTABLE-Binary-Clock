@@ -349,7 +349,7 @@ while True:
 	clear()
 	h= time.localtime(time.time()).tm_hour
 	m = time.localtime(time.time()).tm_min
-	print h,m
+	#print h,m
 	hour(h)
 	minute(m)
 	display()
