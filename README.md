@@ -12,7 +12,7 @@ http://imgur.com/a/yVOh2
   
   
 ###Important  
-Due to the lack of RTC (Real Time Clock) in the Raspberry Pi B, this script is practically useless unless the Raspi is connected to the internet.  
+The lack of RTC (Real Time Clock) in the Raspberry Pi B renders this script practically useless unless the Raspi is connected to the internet. Without, the Raspi just resumes the time before shutdown.  
 
-Without, the Raspi just resumes the time before shutdown.
+But Hey! It works^^
 
