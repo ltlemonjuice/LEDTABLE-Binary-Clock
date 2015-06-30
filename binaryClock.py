@@ -4,7 +4,7 @@ import array
 import fcntl
 import sys
 import math
-
+# 
 # Open SPI device
 spidev = file("/dev/spidev0.0", "wb")
 #byte array to store rgb values
@@ -38,8 +38,8 @@ cmatrix = [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0
 			
 #Define Functions for Allocation and Display
 def allocate():
-#gleich wie bei imgdisp.py, wird einfach noch gespiegelt
-#damit punkt 0/0 am linken oberen rand ist
+	#same as imgdisp.py, but with mirror so that 0/0 is at the upper left corner
+	#Matrix is technically in reverse. X-Axis is horizontal, Y-Axis Vertical.11¦¦¦
 	#print "Allocating..."
 	for x in range(0,10):
 		for y in range (0,10):
@@ -289,7 +289,7 @@ m8 = [[3,0],[3,1],[3,2],[4,0],[4,1],[4,2],[5,0],[5,1],[6,0],[6,1]]
 m16 = [[3,3],[3,4],[4,3],[4,4],[5,2],[5,3],[5,4],[6,2],[6,3],[6,4]]
 m32 = [[3,5],[3,6],[3,7],[4,5],[4,6],[4,7],[5,5],[5,6],[6,5],[6,6]]
 
-
+#Combinations for every hour/minute
 hnums = [[h1],[h2],[h1,h2],[h4],[h1,h4],[h2,h4],[h1,h2,h4],[h8],[h1,h8],[h2,h8],
 				[h1,h2,h8],[h4,h8]]
 	
@@ -353,8 +353,3 @@ while True:
 	hour(h)
 	minute(m)
 	display()
-	
-
-
-
-
