@@ -291,7 +291,7 @@ def clear():
 
 def getClockFace():
 	global current
-#falls stdin vorhanden wird es auf input gespeichert
+	#falls stdin vorhanden wird es auf input gespeichert
 	print sys.argv[:]
 	if len(sys.argv) > 1:
 		Input = sys.argv[1]
@@ -503,13 +503,15 @@ def analogClock():
 				pass
 
 	def makeClock():
-		h = str(time.localtime(time.time()).tm_hour)
+		h = str(time.localtime(time.time()).tm_hour % 12)
 		m = str(time.localtime(time.time()).tm_min)
 		sec = time.localtime(time.time()).tm_sec
 		
 		partsh = []
 		partsm = []
 		
+		if h == "0":
+			h = "12"
 		if len(m) == 1:
 			m = "0" + m
 
@@ -542,9 +544,16 @@ def analogClock():
 	#Numbers
 
 def scrollClock():
-	h= time.localtime(time.time()).tm_hour
-	m = time.localtime(time.time()).tm_min
-	os.system("python /home/pi/led/progs10/scrollText.py %d:%d 0.1 [0,0,255] 1" % (h, m) )
+	h= str(time.localtime(time.time()).tm_hour)
+	m = str(time.localtime(time.time()).tm_min)
+
+	if len(h) == 1:
+		h = "0" + h
+			
+	if len(m) == 1:
+		m = "0" + m
+
+	os.system("python /home/pi/led/progs10/scrollText.py %s:%s 0.1 [0,0,255] 1" % (h, m) )
 
 
 
