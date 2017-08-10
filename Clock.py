@@ -1,44 +1,34 @@
 #!/usr/bin/env python
-#coding: utf8 
+#coding: utf8
 import time
 import array
-import fcntl
 import sys
 import math
 import select
 import os
-# 
-# Open SPI device
-spidev = file("/dev/spidev0.0", "wb")
-#byte array to store rgb values
-rgb=bytearray(3)
-#setting spi frequency to 400kbps
-fcntl.ioctl(spidev, 0x40046b04, array.array('L', [400000]))
+import numpy as np
+
+try:
+	import fcntl
+except:
+	pass
+
+rgb = bytearray(3)
+
+try:
+    # Open SPI device
+    spidev = file("/dev/spidev0.0", "wb")
+    # byte array to store rgb values
+    # setting spi frequency to 400kbps
+    fcntl.ioctl(spidev, 0x40046b04, array.array('L', [400000]))
+except:
+    pass
 
 #creating 10x10 matrix (last digit may be used later for alpha control)
-matrix = [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-		  [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]]
+matrix = [[[0 for x in range(3)] for x in range(10)] for x in range(10)]
+cmatrix = [[[0 for x in range(3)] for x in range(10)] for x in range(10)]
 
-cmatrix = [[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]],
-			[[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]]
 
-			
 
 
 
@@ -49,16 +39,16 @@ def allocate():
 	#print "Allocating..."
 	for x in range(0,10):
 		for y in range (0,10):
-			cmatrix[x][y][0] = matrix[x][y][0] 
-			cmatrix[x][y][1] = matrix[x][y][1] 
+			cmatrix[x][y][0] = matrix[x][y][0]
+			cmatrix[x][y][1] = matrix[x][y][1]
 			cmatrix[x][y][2] = matrix[x][y][2]
-			
+
 			#Column 1
 			col = 1
 			if x == col and y == 0:
 				cmatrix[x][y][0] = matrix[col][9][0]
-				cmatrix[x][y][1] = matrix[col][9][1] 
-				cmatrix[x][y][2] = matrix[col][9][2]			
+				cmatrix[x][y][1] = matrix[col][9][1]
+				cmatrix[x][y][2] = matrix[col][9][2]
 			elif x == col and y == 1:
 				cmatrix[x][y][0] = matrix[col][8][0]
 				cmatrix[x][y][1] = matrix[col][8][1]
@@ -78,15 +68,15 @@ def allocate():
 			elif x == col and y == 5:
 				cmatrix[x][y][0] = matrix[col][4][0]
 				cmatrix[x][y][1] = matrix[col][4][1]
-				cmatrix[x][y][2] = matrix[col][4][2]			
+				cmatrix[x][y][2] = matrix[col][4][2]
 			elif x == col and y == 6:
 				cmatrix[x][y][0] = matrix[col][3][0]
 				cmatrix[x][y][1] = matrix[col][3][1]
-				cmatrix[x][y][2] = matrix[col][3][2]	
+				cmatrix[x][y][2] = matrix[col][3][2]
 			elif x == col and y == 7:
 				cmatrix[x][y][0] = matrix[col][2][0]
 				cmatrix[x][y][1] = matrix[col][2][1]
-				cmatrix[x][y][2] = matrix[col][2][2]	
+				cmatrix[x][y][2] = matrix[col][2][2]
 			elif x == col and y == 8:
 				cmatrix[x][y][0] = matrix[col][1][0]
 				cmatrix[x][y][1] = matrix[col][1][1]
@@ -95,13 +85,13 @@ def allocate():
 				cmatrix[x][y][0] = matrix[col][0][0]
 				cmatrix[x][y][1] = matrix[col][0][1]
 				cmatrix[x][y][2] = matrix[col][0][2]
-				
+
 				#Column 3
 			col = 3
 			if x == col and y == 0:
 				cmatrix[x][y][0] = matrix[col][9][0]
-				cmatrix[x][y][1] = matrix[col][9][1] 
-				cmatrix[x][y][2] = matrix[col][9][2]			
+				cmatrix[x][y][1] = matrix[col][9][1]
+				cmatrix[x][y][2] = matrix[col][9][2]
 			elif x == col and y == 1:
 				cmatrix[x][y][0] = matrix[col][8][0]
 				cmatrix[x][y][1] = matrix[col][8][1]
@@ -121,15 +111,15 @@ def allocate():
 			elif x == col and y == 5:
 				cmatrix[x][y][0] = matrix[col][4][0]
 				cmatrix[x][y][1] = matrix[col][4][1]
-				cmatrix[x][y][2] = matrix[col][4][2]			
+				cmatrix[x][y][2] = matrix[col][4][2]
 			elif x == col and y == 6:
 				cmatrix[x][y][0] = matrix[col][3][0]
 				cmatrix[x][y][1] = matrix[col][3][1]
-				cmatrix[x][y][2] = matrix[col][3][2]	
+				cmatrix[x][y][2] = matrix[col][3][2]
 			elif x == col and y == 7:
 				cmatrix[x][y][0] = matrix[col][2][0]
 				cmatrix[x][y][1] = matrix[col][2][1]
-				cmatrix[x][y][2] = matrix[col][2][2]	
+				cmatrix[x][y][2] = matrix[col][2][2]
 			elif x == col and y == 8:
 				cmatrix[x][y][0] = matrix[col][1][0]
 				cmatrix[x][y][1] = matrix[col][1][1]
@@ -138,13 +128,13 @@ def allocate():
 				cmatrix[x][y][0] = matrix[col][0][0]
 				cmatrix[x][y][1] = matrix[col][0][1]
 				cmatrix[x][y][2] = matrix[col][0][2]
-				
+
 				#Column 5
 			col = 5
 			if x == col and y == 0:
 				cmatrix[x][y][0] = matrix[col][9][0]
-				cmatrix[x][y][1] = matrix[col][9][1] 
-				cmatrix[x][y][2] = matrix[col][9][2]			
+				cmatrix[x][y][1] = matrix[col][9][1]
+				cmatrix[x][y][2] = matrix[col][9][2]
 			elif x == col and y == 1:
 				cmatrix[x][y][0] = matrix[col][8][0]
 				cmatrix[x][y][1] = matrix[col][8][1]
@@ -164,15 +154,15 @@ def allocate():
 			elif x == col and y == 5:
 				cmatrix[x][y][0] = matrix[col][4][0]
 				cmatrix[x][y][1] = matrix[col][4][1]
-				cmatrix[x][y][2] = matrix[col][4][2]			
+				cmatrix[x][y][2] = matrix[col][4][2]
 			elif x == col and y == 6:
 				cmatrix[x][y][0] = matrix[col][3][0]
 				cmatrix[x][y][1] = matrix[col][3][1]
-				cmatrix[x][y][2] = matrix[col][3][2]	
+				cmatrix[x][y][2] = matrix[col][3][2]
 			elif x == col and y == 7:
 				cmatrix[x][y][0] = matrix[col][2][0]
 				cmatrix[x][y][1] = matrix[col][2][1]
-				cmatrix[x][y][2] = matrix[col][2][2]	
+				cmatrix[x][y][2] = matrix[col][2][2]
 			elif x == col and y == 8:
 				cmatrix[x][y][0] = matrix[col][1][0]
 				cmatrix[x][y][1] = matrix[col][1][1]
@@ -181,13 +171,13 @@ def allocate():
 				cmatrix[x][y][0] = matrix[col][0][0]
 				cmatrix[x][y][1] = matrix[col][0][1]
 				cmatrix[x][y][2] = matrix[col][0][2]
-			
+
 			#Column 7
 			col = 7
 			if x == col and y == 0:
 				cmatrix[x][y][0] = matrix[col][9][0]
-				cmatrix[x][y][1] = matrix[col][9][1] 
-				cmatrix[x][y][2] = matrix[col][9][2]			
+				cmatrix[x][y][1] = matrix[col][9][1]
+				cmatrix[x][y][2] = matrix[col][9][2]
 			elif x == col and y == 1:
 				cmatrix[x][y][0] = matrix[col][8][0]
 				cmatrix[x][y][1] = matrix[col][8][1]
@@ -207,15 +197,15 @@ def allocate():
 			elif x == col and y == 5:
 				cmatrix[x][y][0] = matrix[col][4][0]
 				cmatrix[x][y][1] = matrix[col][4][1]
-				cmatrix[x][y][2] = matrix[col][4][2]			
+				cmatrix[x][y][2] = matrix[col][4][2]
 			elif x == col and y == 6:
 				cmatrix[x][y][0] = matrix[col][3][0]
 				cmatrix[x][y][1] = matrix[col][3][1]
-				cmatrix[x][y][2] = matrix[col][3][2]	
+				cmatrix[x][y][2] = matrix[col][3][2]
 			elif x == col and y == 7:
 				cmatrix[x][y][0] = matrix[col][2][0]
 				cmatrix[x][y][1] = matrix[col][2][1]
-				cmatrix[x][y][2] = matrix[col][2][2]	
+				cmatrix[x][y][2] = matrix[col][2][2]
 			elif x == col and y == 8:
 				cmatrix[x][y][0] = matrix[col][1][0]
 				cmatrix[x][y][1] = matrix[col][1][1]
@@ -224,13 +214,13 @@ def allocate():
 				cmatrix[x][y][0] = matrix[col][0][0]
 				cmatrix[x][y][1] = matrix[col][0][1]
 				cmatrix[x][y][2] = matrix[col][0][2]
-				
+
 				#Column 9
 			col = 9
 			if x == col and y == 0:
 				cmatrix[x][y][0] = matrix[col][9][0]
-				cmatrix[x][y][1] = matrix[col][9][1] 
-				cmatrix[x][y][2] = matrix[col][9][2]			
+				cmatrix[x][y][1] = matrix[col][9][1]
+				cmatrix[x][y][2] = matrix[col][9][2]
 			elif x == col and y == 1:
 				cmatrix[x][y][0] = matrix[col][8][0]
 				cmatrix[x][y][1] = matrix[col][8][1]
@@ -250,15 +240,15 @@ def allocate():
 			elif x == col and y == 5:
 				cmatrix[x][y][0] = matrix[col][4][0]
 				cmatrix[x][y][1] = matrix[col][4][1]
-				cmatrix[x][y][2] = matrix[col][4][2]			
+				cmatrix[x][y][2] = matrix[col][4][2]
 			elif x == col and y == 6:
 				cmatrix[x][y][0] = matrix[col][3][0]
 				cmatrix[x][y][1] = matrix[col][3][1]
-				cmatrix[x][y][2] = matrix[col][3][2]	
+				cmatrix[x][y][2] = matrix[col][3][2]
 			elif x == col and y == 7:
 				cmatrix[x][y][0] = matrix[col][2][0]
 				cmatrix[x][y][1] = matrix[col][2][1]
-				cmatrix[x][y][2] = matrix[col][2][2]	
+				cmatrix[x][y][2] = matrix[col][2][2]
 			elif x == col and y == 8:
 				cmatrix[x][y][0] = matrix[col][1][0]
 				cmatrix[x][y][1] = matrix[col][1][1]
@@ -267,21 +257,32 @@ def allocate():
 				cmatrix[x][y][0] = matrix[col][0][0]
 				cmatrix[x][y][1] = matrix[col][0][1]
 				cmatrix[x][y][2] = matrix[col][0][2]
-				
+
 	cmatrix.reverse()
-				
+
 def display():
 	#allocating
 	allocate()
 	for x in range(0, 10):
-		for y in range(0, 10):	
+		for y in range(0, 10):
 			rgb[0] = cmatrix[x][y][0]
 			rgb[1] = cmatrix[x][y][1]
 			rgb[2] = cmatrix[x][y][2]
-			spidev.write(rgb)
-								
-	spidev.flush() 
-	
+			try:
+				spidev.write(rgb)
+			except:
+				pass
+
+
+	try:
+		spidev.flush()
+	except:
+		f = open("save.matrix", "r")
+		if not f.read() == np.array2string(np.flipud(np.rot90(matrix)), separator=",").replace("\n", "").replace(" ", ""):
+			f = open("save.matrix", "w+")
+			f.write(np.array2string(np.flipud(np.rot90(matrix)), separator=",").replace("\n", "").replace(" ", ""))
+
+
 def clear():
 	for x in range(0,10):
 		for y in range(0,10):
@@ -331,19 +332,19 @@ def binClock():
 	#Combinations for every hour/minute
 	hnums = [[h1],[h2],[h1,h2],[h4],[h1,h4],[h2,h4],[h1,h2,h4],[h8],[h1,h8],[h2,h8],
 					[h1,h2,h8],[h4,h8]]
-		
+
 	mnums =  [[m1],[m2],[m1,m2],[m4],[m1,m4],[m2,m4],[m1,m2,m4],[m8],[m1,m8],[m2,m8],
 			[m1,m2,m8],[m4,m8],[m1,m4,m8],[m2,m4,m8],[m1,m2,m4,m8],[m16],[m1,m16],[m2,m16],[m1,m2,m16],[m4,m16],
 			[m1,m4,m16],[m2,m4,m16],[m1,m2,m4,m16],[m8,m16],[m1,m8,m16],[m2,m8,m16],[m1,m2,m8,m16],[m4,m8,m16],[m1,m4,m8,m16],[m2,m4,m8,m16],
 			[m1,m2,m4,m8,m16],[m32],[m1,m32],[m2,m32],[m1,m2,m32],[m4,m32],[m1,m4,m32],[m2,m4,m32],[m1,m2,m4,m32],[m8,m32],
 			[m1,m8,m32],[m2,m8,m32],[m1,m2,m8,m32],[m4,m8,m32],[m1,m4,m8,m32],[m2,m4,m8,m32],[m1,m2,m4,m8,m32],[m16,m32],[m1,m16,m32],[m2,m16,m32],
 			[m1,m2,m16,m32],[m4,m16,m32],[m1,m4,m16,m32],[m2,m4,m16,m32],[m1,m2,m4,m16,m32],[m8,m16,m32],[m1,m8,m16,m32],[m2,m8,m16,m32],[m1,m2,m8,m16,m32]]
-			
+
 
 	def hour(time):
 		if time == 0:
 			time = 12
-			
+
 		nums = hnums[(time%12)-1]
 		try:
 			for i in range(0,3):
@@ -353,7 +354,7 @@ def binClock():
 					matrix[x][y][0] = 255
 					matrix[x][y][1] = 0
 					matrix[x][y][2] = 0
-					
+
 		except:
 			pass
 
@@ -369,18 +370,21 @@ def binClock():
 						matrix[x][y][0] = 0
 						matrix[x][y][1] = 0
 						matrix[x][y][2] = 255
-						
+
 			except:
 				pass
 		else:
 			pass
-				
+
 	#MAIN binClock
-	hour(h)
-	minute(m)
+	while True:
+		clear()
+		hour(h)
+		minute(m)
+		display()
 
 def digClock():
-	
+
 	def getPixels(number,x,y):
 		dic = {"1":[[x+2,y+0],[x+2,y+1],[x+2,y+2],[x+2,y+3],[x+2,y+4]],
 				"2":[[x+0,y+0],[x+0,y+2],[x+0,y+3],[x+0,y+4],[x+1,y+0],[x+1,y+2],[x+1,y+4],[x+2,y+0],[x+2,y+1],[x+2,y+2],[x+2,y+4]],
@@ -399,14 +403,14 @@ def digClock():
 		#print dic[str(number)]
 		return dic[str(number)]
 
-	
+
 	def setMatrix(parts, color):
-	
+
 		for i in range(0, len(parts)):
 			try:
 				a = parts[i][0]
 				b = parts[i][1]
-				
+
 				matrix[a][b][0] = color[0]
 				matrix[a][b][1] = color[1]
 				matrix[a][b][2] = color[2]
@@ -419,16 +423,16 @@ def digClock():
 		h = str(time.localtime(time.time()).tm_hour)
 		m = str(time.localtime(time.time()).tm_min)
 		sec = time.localtime(time.time()).tm_sec
-		
+
 		partsh = []
 		partsm = []
 		partss = []
 		parts = []
 
-		
+
 		if len(h) == 1:
 			h = "0" + h
-			
+
 		if len(m) == 1:
 			m = "0" + m
 
@@ -443,7 +447,7 @@ def digClock():
 			partss.extend(getPixels(":",0,5))
 		else:
 			partss.extend(getPixels(" ",0,5))
-			
+
 		clear()
 		setMatrix(partsh,[255,0,0])
 		setMatrix(partsm,[0,0,255])
@@ -486,14 +490,14 @@ def analogClock():
 		#print dic[str(number)]
 		return dic[str(number)]
 
-	
+
 	def setMatrix(parts, color):
-	
+
 		for i in range(0, len(parts)):
 			try:
 				a = parts[i][0]
 				b = parts[i][1]
-				
+
 				matrix[a][b][0] = color[0]
 				matrix[a][b][1] = color[1]
 				matrix[a][b][2] = color[2]
@@ -506,10 +510,10 @@ def analogClock():
 		h = str(time.localtime(time.time()).tm_hour % 12)
 		m = str(time.localtime(time.time()).tm_min)
 		sec = time.localtime(time.time()).tm_sec
-		
+
 		partsh = []
 		partsm = []
-		
+
 		if h == "0":
 			h = "12"
 		if len(m) == 1:
@@ -521,7 +525,7 @@ def analogClock():
 				pass
 			else:
 				partsh.extend(getPixels(("h%d" %i),0,0))
-		
+
 		partsm.extend(getPixels(m[0],2,2))
 		partsm.extend(getPixels(m[1],5,3))
 
@@ -529,18 +533,18 @@ def analogClock():
 			partsh.extend(getPixels("h%s" %h,0,0))
 		else:
 			partsh.extend(getPixels(" ",0,0))
-			
+
 		clear()
 		setMatrix(partsh,[255,0,0])
 		setMatrix(partsm,[0,0,255])
-		
+
 
 
 	while True:
 		clear()
 		makeClock()
-		display()	
-	
+		display()
+
 	#Numbers
 
 def scrollClock():
@@ -549,7 +553,7 @@ def scrollClock():
 
 	if len(h) == 1:
 		h = "0" + h
-			
+
 	if len(m) == 1:
 		m = "0" + m
 
@@ -561,16 +565,14 @@ def scrollClock():
 h= time.localtime(time.time()).tm_hour
 m = time.localtime(time.time()).tm_min
 
- #0 = Binary, 1 = Digital, 2 = Analog, 3 = Scroll 		
+ #0 = Binary, 1 = Digital, 2 = Analog, 3 = Scroll
 
 
 clear()
 getClockFace()
 if current == 0:
 	print ("Binary Clock selected")
-	while True:
-		binClock()
-		display()
+	binClock()
 elif current == 1:
 	print ("Digital Clock selected")
 	digClock()
@@ -581,6 +583,3 @@ elif current == 3:
 	print ("Scrolling Clock selected")
 	while True:
 		scrollClock()
-
-
-	
