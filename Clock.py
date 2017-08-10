@@ -378,6 +378,8 @@ def binClock():
 
 	#MAIN binClock
 	while True:
+		h= time.localtime(time.time()).tm_hour
+		m = time.localtime(time.time()).tm_min
 		clear()
 		hour(h)
 		minute(m)
